@@ -1,0 +1,20 @@
+other way to fetch
+
+fetch(API_URL)
+        .then((res) => res.json())
+        .then((data) => {
+        console.log(data);
+        console.log(data.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
+        setListofRestaurants(data.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
+         setFilteredRestaurants(data.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
+        })
+
+
+possible ui not showing
+-not giving () in  <button onClick={()=>filterTopRatedRestaurants()}>Top recommended</button>
+-giving {} in jsx instead of () 
+{filteredRestaurants.map((restaurant) => (
+<RestaurantCard key={restaurant.info.id} resData={restaurant?.info} />
+))}
+- not giving dependency arry in useEffect infinite loop DOOMED----
+-

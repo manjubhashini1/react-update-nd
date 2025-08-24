@@ -1,0 +1,1 @@
+export const API_URL = "https://raw.githubusercontent.com/namastedev/namaste-react/refs/heads/main/swiggy-api";
