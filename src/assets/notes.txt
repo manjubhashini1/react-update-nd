@@ -17,4 +17,7 @@ possible ui not showing
 <RestaurantCard key={restaurant.info.id} resData={restaurant?.info} />
 ))}
 - not giving dependency arry in useEffect infinite loop DOOMED----
--
+- while creating HOC where you want to consume you need to first create the component like const promoted = cardPromoted(RestaurantCard);
+- Then <promoted resData=data />
+-if in jsx {} you are using map or filter and r using condition the go for {} and return the jsx else just use()
+

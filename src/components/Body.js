@@ -1,55 +1,66 @@
 import RestaurantCard from "./RestaurantCard";
 import { useEffect, useState } from "react";
-import { API_URL } from "../utils/constants";
+import useGetRestaurantList from "../utils/useGetRestaurantList";
+import Shimmer from "./Shimmer";
+import { Link } from "react-router";
+import useGetOnlineStatus from "../utils/useGetOnlineStatus";
+import { DealsCard } from "./RestaurantCard";
 
 const Body = () => {
 
     const [listofRestaurants, setListofRestaurants] = useState([]);
     const [filteredRestaurants, setFilteredRestaurants] = useState([]);
     const [searchText, setSearchText] = useState("");
+    const apiData = useGetRestaurantList();
+    const userOnlineStatus = useGetOnlineStatus();
+
+    const RestaurantCardPromoted = DealsCard(RestaurantCard);
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        const cards = apiData?.data?.cards;
+        if (!cards) return;          //  guard before slice
+        const restaurants = cards.slice(3); // skip first 3
+        setListofRestaurants(restaurants);
+        setFilteredRestaurants(restaurants);
+    }, [apiData]);
 
-    const fetchData = async () => {
-        const data = await fetch(API_URL);
-        const json = await data.json();
-        console.log(json);
-        setListofRestaurants(json?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
-        setFilteredRestaurants(json?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
-    }
     console.log("filteredRestaurants", filteredRestaurants);
 
     const filterTopRatedRestaurants = () => {
-        const filter = listofRestaurants.filter((res)=> (res.info.avgRating > 4.2));
+        const filter = listofRestaurants.filter((res) => (res.card.card.info.avgRating > 4.2));
         console.log("filter rating", filter);
         setFilteredRestaurants(filter)
     }
 
     const searchData = () => {
-        const search = listofRestaurants.filter((res) => res.info.name.toLowerCase().includes(searchText.toLowerCase()));
+        const search = listofRestaurants.filter((res) => res.card.card.info.name.toLowerCase().includes(searchText.toLowerCase()));
         console.log("searchText", search);
         setFilteredRestaurants(search);
     }
 
-    return (
+    if (!userOnlineStatus) return <h1 className="flex items-center align-middle justify-center">🔴 Offline, Please check your internet connection!!</h1>
+
+    return listofRestaurants.length === 0 ? (<Shimmer />) : (
         <div className="body-container">
             <div className="filter-section">
                 <div className="search-section">
-                    <input type="text" 
-                    className="search-input" 
-                    placeholder="Search" 
-                    value={searchText}
-                    onChange={(e)=>setSearchText(e.target.value)}
+                    <input type="text"
+                        className="search-input border-2 p-2"
+                        placeholder="Search"
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') searchData() }}
                     />
-                    <button className="search-btn" onClick={()=>searchData()}>Search</button>
+                    <button className="search-btn" onClick={() => searchData()}>Search</button>
                 </div>
-                <button onClick={()=>filterTopRatedRestaurants()}>Top recommended</button>
+                <button onClick={() => filterTopRatedRestaurants()}>Top recommended</button>
             </div>
             <div className="resCardList">
                 {filteredRestaurants.map((restaurant) => (
-                    <RestaurantCard key={restaurant.info.id} resData={restaurant?.info} />
+                    <Link to={"/restaurants/" + restaurant.card.card.info.id} key={restaurant.card.card.info.id}>
+                        {restaurant.card?.card?.info?.aggregatedDiscountInfoV3 ? (<RestaurantCardPromoted resData={restaurant.card.card.info} />) :
+                            (<RestaurantCard resData={restaurant.card.card.info} />)}
+                    </Link>
 
                 ))}
             </div>
